@@ -68,7 +68,6 @@ router.put(
       .then((result) => {
         res.status(200).json({
           message: "Update Successfull!",
-          imagePath: post.imagePath,
         });
       })
       .catch((err) => {
