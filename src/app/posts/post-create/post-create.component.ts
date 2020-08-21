@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { ActivatedRoute, ParamMap, Router } from "@angular/router";
+import { ActivatedRoute, ParamMap } from "@angular/router";
 import { Post } from "../post.model";
 import { PostsService } from "../posts.service";
 import { mimeType } from "./mime-type.validator";
@@ -11,11 +11,7 @@ import { mimeType } from "./mime-type.validator";
   styleUrls: ["./post-create.component.css"],
 })
 export class PostCreateComponent implements OnInit {
-  constructor(
-    public postService: PostsService,
-    public route: ActivatedRoute,
-    private router: Router
-  ) {}
+  constructor(public postService: PostsService, public route: ActivatedRoute) {}
 
   enteredTitle = "";
   enteredContent = "";
@@ -104,6 +100,5 @@ export class PostCreateComponent implements OnInit {
       );
     }
     this.form.reset();
-    this.router.navigate(["/"]);
   }
 }

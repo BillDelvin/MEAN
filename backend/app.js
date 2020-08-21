@@ -1,15 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const path = require("path");
 const app = express();
+
 const postRoutes = require("./routes/posts");
-const { static } = require("express");
+const userRoutes = require("./routes/user");
 
 mongoose
   .connect(
     "mongodb+srv://bill1234:billdelvin1234@devconnector-yuje7.mongodb.net/mean?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true }
+    { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
   )
   .then(() => {
     console.log("Connected to database!");
@@ -37,5 +37,6 @@ app.use((req, res, next) => {
 });
 
 app.use("/api", postRoutes);
+app.use("/api", userRoutes);
 
 module.exports = app;

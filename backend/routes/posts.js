@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const postModel = require("../models/post");
-const { createPostfix } = require("typescript");
 
 const MIME_TYPE_MAP = {
   "image/png": "png",
@@ -39,7 +38,7 @@ router.post(
     posts.save().then((createdPost) => {
       res.status(201).json({
         message: "post added successfully",
-        postId: {
+        post: {
           ...createdPost,
           id: createdPost._id,
         },
@@ -77,12 +76,25 @@ router.put(
 );
 
 router.get("/getPosts", async (req, res, next) => {
-  await postModel.find().then((data) => {
-    res.status(200).json({
-      message: "posts Fetch Succesfully",
-      posts: data,
+  const pageSize = +req.query.pagesize;
+  const currentPage = +req.query.page;
+  let postQuery = postModel.find();
+  let fethcedPost;
+  if (pageSize && currentPage) {
+    postQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+  }
+  await postQuery
+    .then((data) => {
+      fethcedPost = data;
+      return postModel.countDocuments();
+    })
+    .then((count) => {
+      res.status(200).json({
+        message: "posts Fetched Succesfully",
+        posts: fethcedPost,
+        maxPosts: count,
+      });
     });
-  });
 });
 
 router.get("/getPost/:id", async (req, res, next) => {
