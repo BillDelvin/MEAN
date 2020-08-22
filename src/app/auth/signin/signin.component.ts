@@ -1,6 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import { NgForm } from "@angular/forms";
 import { AuthService } from "../auth.service";
+import { HttpClient } from "@angular/common/http";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-signin",
@@ -18,7 +20,7 @@ export class Signin implements OnInit {
     if (form.invalid) {
       return;
     }
-
+    this.isLoading = true;
     this.authService.signinUser(form.value.email, form.value.password);
   }
 }
