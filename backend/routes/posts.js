@@ -37,6 +37,7 @@ router.post(
       title: req.body.title,
       content: req.body.content,
       imagePath: url + "/images/" + req.file.filename,
+      creator: req.userData.userId,
     });
     posts.save().then((createdPost) => {
       res.status(201).json({
@@ -65,13 +66,20 @@ router.put(
       title: req.body.title,
       content: req.body.content,
       imagePath: imagePath,
+      creator: req.userData.userId,
     });
     await postModel
-      .updateOne({ _id: req.params.id }, post)
+      .updateOne({ _id: req.params.id, creator: req.userData.userId }, post)
       .then((result) => {
-        res.status(200).json({
-          message: "Update Successfull!",
-        });
+        if (result.nModified > 0) {
+          res.status(200).json({
+            message: "Update Successfull!",
+          });
+        } else {
+          res.status(401).json({
+            message: "Update Failed!",
+          });
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -112,9 +120,19 @@ router.get("/getPost/:id", async (req, res, next) => {
 });
 
 router.delete("/deletePost/:id", checkAuth, async (req, res, next) => {
-  postModel.deleteOne({ _id: req.params.id }).then((result) => {
-    res.status(200).json({ message: "Post deleted!" });
-  });
+  postModel
+    .deleteOne({ _id: req.params.id, creator: req.userData.userId })
+    .then((result) => {
+      if (result.n > 0) {
+        res.status(200).json({
+          message: "Post deleted!",
+        });
+      } else {
+        res.status(401).json({
+          message: "Post deleted failed!",
+        });
+      }
+    });
 });
 
 module.exports = router;
