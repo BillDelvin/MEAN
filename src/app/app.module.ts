@@ -10,7 +10,9 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatPaginatorModule } from "@angular/material/paginator";
+import { MatDialogModule } from "@angular/material/dialog";
 import { AuthInterceptor } from "./auth/auth-interceptor";
+import { ErrorInterceptor } from "./error-interceptor";
 
 // component
 import { AppRoutingModule } from "./app-routing.module";
@@ -20,6 +22,7 @@ import { Signup } from "./auth/signup/signup.component";
 import { PostCreateComponent } from "./posts/post-create/post-create.component";
 import { HeaderComponent } from "./header/header.component";
 import { PostListComponent } from "./posts/post-list/post-list.component";
+import { ErrorComponent } from "./error/error.component";
 
 @NgModule({
   declarations: [
@@ -29,6 +32,7 @@ import { PostListComponent } from "./posts/post-list/post-list.component";
     PostCreateComponent,
     HeaderComponent,
     PostListComponent,
+    ErrorComponent,
   ],
   imports: [
     BrowserModule,
@@ -44,10 +48,13 @@ import { PostListComponent } from "./posts/post-list/post-list.component";
     HttpClientModule,
     MatProgressSpinnerModule,
     MatPaginatorModule,
+    MatDialogModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
+  entryComponents: [ErrorComponent],
 })
 export class AppModule {}

@@ -10,6 +10,7 @@ export class AuthService {
   private token: string;
   private authStatusListener = new Subject<boolean>();
   private tokenTimer: any;
+  private userId: string;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -21,42 +22,57 @@ export class AuthService {
     return this.isAuthenticated;
   }
 
+  getUserId() {
+    return this.userId;
+  }
+
   getAuthStatusListener() {
     return this.authStatusListener.asObservable();
   }
 
   createUser(email: string, password: string) {
     const authData: AuthData = { email, password };
-    this.http
+    return this.http
       .post("http://localhost:3300/api/user/signup", authData)
-      .subscribe((response) => {
-        console.log(response);
-      });
+      .subscribe(
+        (response) => {
+          this.router.navigate(["/"]);
+        },
+        (error) => {
+          this.authStatusListener.next(false);
+        }
+      );
   }
 
   signinUser(email: string, password: string) {
     const authData: AuthData = { email, password };
     this.http
-      .post<{ token: string; expiresIn: number }>(
+      .post<{ token: string; expiresIn: number; userId: string }>(
         "http://localhost:3300/api/user/signin",
         authData
       )
-      .subscribe((response) => {
-        const token = response.token;
-        this.token = token;
-        if (token) {
-          const expiresInDuration = response.expiresIn;
-          this.setAuthTimer(expiresInDuration);
-          this.isAuthenticated = true;
-          this.authStatusListener.next(true);
-          const now = new Date(); //time right now
-          const expirationDate = new Date(
-            now.getTime() + expiresInDuration * 1000
-          );
-          this.saveAuthData(token, expirationDate);
-          this.router.navigate(["/"]);
+      .subscribe(
+        (response) => {
+          const token = response.token;
+          this.token = token;
+          if (token) {
+            this.userId = response.userId;
+            const expiresInDuration = response.expiresIn;
+            this.setAuthTimer(expiresInDuration);
+            this.isAuthenticated = true;
+            this.authStatusListener.next(true);
+            const now = new Date(); //time right now
+            const expirationDate = new Date(
+              now.getTime() + expiresInDuration * 1000
+            );
+            this.saveAuthData(token, expirationDate, this.userId);
+            this.router.navigate(["/"]);
+          }
+        },
+        (error) => {
+          this.authStatusListener.next(false);
         }
-      });
+      );
   }
 
   autoAuthUser() {
@@ -69,6 +85,7 @@ export class AuthService {
     if (expiresIn > 0) {
       this.token = authInformation.token;
       this.setAuthTimer(expiresIn / 1000);
+      this.userId = authInformation.userId;
       this.isAuthenticated = true;
       this.authStatusListener.next(true);
     }
@@ -76,6 +93,7 @@ export class AuthService {
 
   logout() {
     this.token = null;
+    this.userId = null;
     this.isAuthenticated = false;
     this.authStatusListener.next(false);
     clearTimeout(this.tokenTimer);
@@ -89,18 +107,21 @@ export class AuthService {
     }, duration * 1000);
   }
 
-  private saveAuthData(token: string, expiresIn: Date) {
+  private saveAuthData(token: string, expiresIn: Date, userId: string) {
     localStorage.setItem("Token", token);
+    localStorage.setItem("UserId", userId);
     localStorage.setItem("ExpiresIn", expiresIn.toISOString());
   }
 
   private clearAuthData() {
     localStorage.removeItem("Token");
+    localStorage.removeItem("UserId");
     localStorage.removeItem("ExpiresIn");
   }
 
   private getAuthData() {
     const token = localStorage.getItem("Token");
+    const userId = localStorage.getItem("userId");
     const expirationDate = localStorage.getItem("ExpiresIn");
     if (!token || !expirationDate) {
       return;
@@ -108,6 +129,7 @@ export class AuthService {
 
     return {
       token,
+      userId,
       expirationDate: new Date(expirationDate),
     };
   }

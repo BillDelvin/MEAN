@@ -27,6 +27,7 @@ export class PostsService {
                 title: post.title,
                 content: post.content,
                 imagePath: post.imagePath,
+                creator: post.creator,
               };
             }),
             maxPosts: postData.maxPosts,
@@ -52,6 +53,7 @@ export class PostsService {
       title: string;
       content: string;
       imagePath: string;
+      creator: string;
     }>(`http://localhost:3300/api/getPost/${id}`);
   }
 
@@ -80,7 +82,7 @@ export class PostsService {
       postData.append("content", content);
       postData.append("image", image);
     } else {
-      postData = { id, title, content, imagePath: image };
+      postData = { id, title, content, imagePath: image, creator: null };
     }
 
     this.http
