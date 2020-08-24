@@ -4,6 +4,9 @@ import { Subject } from "rxjs";
 import { map } from "rxjs/operators";
 import { Post } from "./post.model";
 import { Router } from "@angular/router";
+import { environment } from "../../environments/environment";
+
+const BACKEND_URL = environment.apiUrl;
 
 @Injectable({ providedIn: "root" })
 export class PostsService {
@@ -16,7 +19,7 @@ export class PostsService {
     const queryParams = `?pagesize=${postsPerPage}&page=${currentPage}`;
     this.http
       .get<{ message: string; posts: any; maxPosts: number }>(
-        "http://localhost:3300/api/getPosts" + queryParams
+        `${BACKEND_URL}/getPosts` + queryParams
       )
       .pipe(
         map((postData) => {
@@ -54,7 +57,7 @@ export class PostsService {
       content: string;
       imagePath: string;
       creator: string;
-    }>(`http://localhost:3300/api/getPost/${id}`);
+    }>(`${BACKEND_URL}/getPost/${id}`);
   }
 
   addPost(title: string, content: string, image: File) {
@@ -65,7 +68,7 @@ export class PostsService {
 
     this.http
       .post<{ message: string; post: Post }>(
-        "http://localhost:3300/api/addPosts",
+        `${BACKEND_URL}/addPosts`,
         postData
       )
       .subscribe(() => {
@@ -85,14 +88,12 @@ export class PostsService {
       postData = { id, title, content, imagePath: image, creator: null };
     }
 
-    this.http
-      .put(`http://localhost:3300/api/updatePost/${id}`, postData)
-      .subscribe(() => {
-        this.router.navigate(["/"]);
-      });
+    this.http.put(`${BACKEND_URL}/updatePost/${id}`, postData).subscribe(() => {
+      this.router.navigate(["/"]);
+    });
   }
 
   deletePost(postId: string) {
-    return this.http.delete(`http://localhost:3300/api/deletePost/${postId}`);
+    return this.http.delete(`${BACKEND_URL}/deletePost/${postId}`);
   }
 }

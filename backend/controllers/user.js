@@ -44,7 +44,7 @@ module.exports = {
         }
         const token = jwt.sign(
           { email: fetchUser.email, userId: fetchUser._id },
-          privateKey,
+          process.env.privateKey,
           { expiresIn: "1h" }
         );
         res.status(200).json({

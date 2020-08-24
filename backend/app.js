@@ -8,7 +8,7 @@ const userRoutes = require("./routes/user");
 
 mongoose
   .connect(
-    "mongodb+srv://bill1234:billdelvin1234@devconnector-yuje7.mongodb.net/mean?retryWrites=true&w=majority",
+    `mongodb+srv://bill1234:${process.env.MONGO_ATLAS}@devconnector-yuje7.mongodb.net/mean?retryWrites=true&w=majority`,
     { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
   )
   .then(() => {
